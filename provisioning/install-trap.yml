@@ -1,0 +1,55 @@
+- name: Install tkp apt dependencies.
+  apt: name={{item}} update_cache=yes cache_valid_time=600
+  with_items: "{{ lookup('file', 'tkp-apt-deps.txt').split() }}"
+  become: yes
+  tags: apt
+
+- name: Create repo / venv dir with correct permissions
+  file:
+    path: "{{item}}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rx"
+    owner: "{{ deploy_user }}"
+  with_items:
+    - "{{ tkp_repo_path }}"
+    - "{{ tkp_venv_path }}"
+  become: yes
+
+- name: Clone tkp repo
+  git:
+    repo: https://github.com/transientskp/tkp.git
+    dest: "{{ tkp_repo_path }}"
+    force: yes
+    version: "{{ tkp_version }}"
+  become: yes
+  become_user: "{{ deploy_user }}"
+
+- name: Install the tkp into venv
+  pip:
+    name: "git+file://{{ tkp_repo_path }}#egg=tkp[pixelstore]"
+    virtualenv: "{{ tkp_venv_path }}"
+  become: yes
+  become_user: "{{ deploy_user }}"
+
+- name: Create trapdemo user
+  user:
+    name: "{{ trap_user }}"
+    shell: "/bin/bash"
+  become: yes
+#
+- name: Create trapdemo dir
+  file:
+    path: "{{ trap_demo_dir }}"
+    state: directory
+    mode: "u=rwx,g=rx,o=rx"
+    owner: "{{ trap_user }}"
+  become: yes
+
+- name: Upload templated pipeline.cfg file
+  template:
+    src: pipeline.cfg.j2
+    dest: "{{ trap_demo_dir }}/pipeline.cfg"
+    owner: "{{ trap_user }}"
+  become: yes
+  become_user: "{{ trap_user }}"
+

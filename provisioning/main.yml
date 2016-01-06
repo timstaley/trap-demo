@@ -1,0 +1,44 @@
+- hosts: test
+
+  vars:
+    - deploy_user: "{{ ansible_user_id }}"
+    - tkp_version: "master"
+    - tkp_shortname: "tkp-{{ tkp_version }}"
+    - tkp_repo_path: "{{ repo_dir }}/{{ tkp_shortname }}"
+    - tkp_venv_path: "{{ default_install_prefix }}/venvs/{{ tkp_shortname }}"
+    - trap_user: "trapdemo"
+    - trap_db: "{{ trap_user }}"
+    - trap_pass: "trappass"
+    - trap_demo_dir: "/home/{{ trap_user }}/trapdemo"
+
+  vars_files:
+    - postgres-test-vars.yml
+
+  roles:
+    - timstaley.base
+    - { role: ANXS.postgresql,
+        become: true
+        }
+    - { role: ../../banana,
+        banana_deploy_user: "{{ deploy_user }}",
+        banana_version: "master",
+        banana_url_subdir: "",
+        }
+    - timstaley.casalibs-ppa
+
+  tasks:
+    - include: install-trap.yml
+      tags: trap
+
+    - name: Grant read-only privs for Banana on TraP DB
+      postgresql_privs:
+        db: "{{ trap_db }}"
+        privs: SELECT
+        objs: ALL_IN_SCHEMA
+        type: table
+        schema: public
+        roles: "{{ banana_postgres_username }}"
+        login: "{{ trap_user }}"
+      become: yes
+      become_user: "{{ trap_user }}"
+      tags: privs

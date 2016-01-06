@@ -1,0 +1,4 @@
+python-numpy python-scipy
+postgresql-client python-psycopg2
+wcslib-dev
+mongodb

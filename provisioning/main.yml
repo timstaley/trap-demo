@@ -19,7 +19,7 @@
     - { role: ANXS.postgresql,
         become: true
         }
-    - { role: ../../banana,
+    - { role: timstaley.banana,
         banana_deploy_user: "{{ deploy_user }}",
         banana_version: "master",
         banana_url_subdir: "",

@@ -64,10 +64,12 @@
   become: yes
   become_user: "{{ trap_user }}"
 
-- name: Check if trapdb already exists
+- name: Check if trapdb has been initialized
   shell:
-    psql -l | grep {{ trap_dbname}}
-  register: trapdb_listing
+    psql {{ trap_dbname}} -c 'select count(*) from dataset;'
+  register: trapdb_connection
+  become: yes
+  become_user: "{{ trap_user }}"
   failed_when: false
 
 - name: Create trapdb if necessary
@@ -76,5 +78,5 @@
         trap-manage.py initdb -y
   args:
     chdir: "{{ trap_jobs_dir }}"
-  when: trapdb_listing.rc | bool
+  when: trapdb_connection.rc | bool
 

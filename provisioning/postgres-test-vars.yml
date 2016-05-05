@@ -23,8 +23,8 @@ postgresql_users:
     pass: "baz"
 
   - name: "{{ trap_user }}"
-    pass: "{{ trap_pass }}"
+    pass: "{{ trap_dbpass }}"
 
 postgresql_databases:
-  - name: "{{ trap_db }}"
+  - name: "{{ trap_dbname }}"
     owner: "{{ trap_user }}"

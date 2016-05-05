@@ -37,19 +37,44 @@
     shell: "/bin/bash"
   become: yes
 #
-- name: Create trapdemo dir
+- name: Create trap-jobs / data dirs
   file:
-    path: "{{ trap_demo_dir }}"
+    path: "{{ item }}"
     state: directory
     mode: "u=rwx,g=rx,o=rx"
     owner: "{{ trap_user }}"
   become: yes
+  with_items:
+    - "{{ trap_jobs_dir }}"
+    - "{{ trap_data_dir }}"
 
 - name: Upload templated pipeline.cfg file
   template:
     src: pipeline.cfg.j2
-    dest: "{{ trap_demo_dir }}/pipeline.cfg"
+    dest: "{{ trap_jobs_dir }}/pipeline.cfg"
     owner: "{{ trap_user }}"
   become: yes
   become_user: "{{ trap_user }}"
+
+- name: Create virtualenv shortcut symlink
+  file:
+    src: "{{ tkp_venv_path }}/bin/activate"
+    dest: "{{ trap_jobs_dir }}/activate_tkp_venv"
+    state: link
+  become: yes
+  become_user: "{{ trap_user }}"
+
+- name: Check if trapdb already exists
+  shell:
+    psql -l | grep {{ trap_dbname}}
+  register: trapdb_listing
+  failed_when: false
+
+- name: Create trapdb if necessary
+  shell:
+      . {{ tkp_venv_path }}/bin/activate &&
+        trap-manage.py initdb -y
+  args:
+    chdir: "{{ trap_jobs_dir }}"
+  when: trapdb_listing.rc | bool
 

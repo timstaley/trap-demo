@@ -6,10 +6,19 @@
     - tkp_shortname: "tkp-{{ tkp_version }}"
     - tkp_repo_path: "{{ repo_dir }}/{{ tkp_shortname }}"
     - tkp_venv_path: "{{ default_install_prefix }}/venvs/{{ tkp_shortname }}"
-    - trap_user: "trapdemo"
-    - trap_db: "{{ trap_user }}"
-    - trap_pass: "trappass"
-    - trap_demo_dir: "/home/{{ trap_user }}/trapdemo"
+
+      # General case:
+#    - trap_user: "trapdemo"
+#    - trap_jobs_dir: "/home/{{ trap_user }}/trap-jobs"
+#    - trap_data_dir: "/home/{{ trap_user }}/trap-data"
+#    - trap_dbname: "{{ trap_user }}"
+
+    # Assuming vagrant / virtualbox usage:
+    - trap_user: "{{ ansible_user_id }}"
+    - trap_jobs_dir: "/vagrant/trap-jobs"
+    - trap_data_dir: "/vagrant/trap-data"
+    - trap_dbname: "trapdemodb"
+    - trap_dbpass: "trappass"
 
   vars_files:
     - postgres-test-vars.yml
@@ -32,7 +41,7 @@
 
     - name: Grant read-only privs for Banana on TraP DB
       postgresql_privs:
-        db: "{{ trap_db }}"
+        db: "{{ trap_dbname }}"
         privs: SELECT
         objs: ALL_IN_SCHEMA
         type: table

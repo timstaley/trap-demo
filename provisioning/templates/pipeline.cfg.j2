@@ -6,14 +6,15 @@ job_directory = %(runtime_directory)s/%(job_name)s
 #log_dir contains output log, plus a copy of the config files used.
 log_dir = %(job_directory)s/logs/%(start_time)s
 debug = False
+colorlog = True
 
 [database]
 host = localhost
 port =
-database = {{ trap_db }}
+database = {{ trap_dbname }}
 engine = postgresql
 user =  {{ trap_user }}
-password = {{ trap_pass }}
+password = {{ trap_dbpass }}
 
 dump_backup_copy = False
 

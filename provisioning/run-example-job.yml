@@ -1,0 +1,13 @@
+- name: Clone sample-data repo
+  git:
+    repo: https://github.com/timstaley/trap-demo-data.git
+    dest: "{{ trap_data_dir }}/sampledata"
+
+- name: Create sample job dir
+  file:
+    path: "{{ trap_jobs_dir }}/grb130427a"
+    state: directory
+    mode: "u=rwx,g=rx,o=rx"
+    owner: "{{ trap_user }}"
+
+

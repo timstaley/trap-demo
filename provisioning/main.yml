@@ -39,6 +39,11 @@
     - include: install-trap.yml
       tags: trap
 
+    - include: run-example-job.yml
+      become: yes
+      become_user: "{{ trap_user }}"
+      tags: example
+
     - name: Grant read-only privs for Banana on TraP DB
       postgresql_privs:
         db: "{{ trap_dbname }}"

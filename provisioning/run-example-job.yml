@@ -3,11 +3,22 @@
     repo: https://github.com/timstaley/trap-demo-data.git
     dest: "{{ trap_data_dir }}/sampledata"
 
-- name: Create sample job dir
-  file:
-    path: "{{ trap_jobs_dir }}/grb130427a"
-    state: directory
-    mode: "u=rwx,g=rx,o=rx"
-    owner: "{{ trap_user }}"
+- name: Upload sample job dir
+  copy:
+    src: "samplejob/"
+    dest: "{{ trap_jobs_dir }}/samplejob"
+
+- name: Check for a log directory from previous runs
+  stat:
+    path: "{{ trap_jobs_dir }}/samplejob/logs"
+  register: samplejob_logs_present
+
+- name: Run samplejob if no signs of logs from previous runs
+  shell:
+    . {{ tkp_venv_path }}/bin/activate &&
+      trap-manage.py run samplejob
+  args:
+    chdir: "{{ trap_jobs_dir }}"
+  when: samplejob_logs_present.stat.exists == False
 
 
